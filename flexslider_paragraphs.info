@@ -1,0 +1,8 @@
+name = Flexslider Paragraphs
+description = Adds a Flexslider display formatter for Paragraphs.
+backdrop = 1.x
+type = module
+package = Paragraphs
+
+dependencies[] = paragraphs
+dependencies[] = flexslider

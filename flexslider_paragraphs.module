@@ -1,0 +1,97 @@
+<?php
+/**
+ * @file
+ * Flexslider Paragraphs hooks and common functions.
+ */
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function flexslider_paragraphs_field_formatter_info() {
+  return array(
+    'flexslider_paragraphs_formatter' => array(
+      'label' => t('Flexslider Paragraphs'),
+      'field types' => array('paragraphs'),
+      'settings' => array(
+        'optionset' => 'default',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function flexslider_paragraphs_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $summary = t('Optionset: %optionset.',
+  array(
+    '%optionset' => $settings['optionset'] ? $settings['optionset'] : t('default'),
+  ));
+  return $summary;
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function flexslider_paragraphs_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $element = array();
+
+  // Show select box for the option set
+  $optionsets = array();
+  foreach (flexslider_optionset_load_all() as $name => $optionset) {
+    $optionsets[$name] = check_plain($optionset['title']);
+  }
+
+  $element['optionset'] = array(
+    '#title' => t('Option set'),
+    '#type' => 'select',
+    '#options' => $optionsets,
+    '#default_value' => $settings['optionset'],
+  );
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function flexslider_paragraphs_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  if (count($items) > 0) {
+
+    foreach ($items as $key => $item) {
+      if(isset($item['item'])) continue;
+      $tmp = $item;
+      $item = array();
+      $item['item'] = $tmp;
+
+      // Render the slide item.
+      if ($display['type'] == 'flexslider_paragraphs_formatter') {
+        // Generate the HTML for the slide.
+        $paragraphs_item = paragraphs_item_load($item['item']['value']);
+        $item['slide'] = backdrop_render($paragraphs_item->view());
+      }
+
+      $items[$key] = $item;
+    }
+
+    $module_path = backdrop_get_path('module', 'flexslider');
+
+    $element[0] = array(
+      '#theme' => 'flexslider',
+      '#items' => $items,
+      '#settings' => $display['settings'],
+      '#attached' => array(
+        'library' => array(
+          array('flexslider', 'flexslider'),
+        ),
+      ),
+    );
+  }
+
+  return $element;
+}
