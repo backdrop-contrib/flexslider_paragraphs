@@ -73,8 +73,10 @@ function flexslider_paragraphs_field_formatter_view($entity_type, $entity, $fiel
       if ($display['type'] == 'flexslider_paragraphs_formatter') {
         // Generate the HTML for the slide.
         $paragraphs_item = paragraphs_item_load($item['item']['value']);
-        $paragraphs_item_view = $paragraphs_item->view();
-        $item['slide'] = backdrop_render($paragraphs_item_view);
+        if (is_object($paragraphs_item)) {
+          $paragraphs_item_view = $paragraphs_item->view();
+          $item['slide'] = backdrop_render($paragraphs_item_view);
+        }
       }
 
       $items[$key] = $item;
